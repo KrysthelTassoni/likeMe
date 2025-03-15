@@ -23,10 +23,60 @@ const create = async (post) => {
       throw error;
     }
   };
-  
 
-// Exporta las funciones para que las utilices en otras partes de la aplicación
-export const postModel = {
-  findAll,
-  create,
+  // Función para obtener un post por su ID
+const findById = async (id) => {
+  try {
+    const query = "SELECT * FROM posts WHERE id = $1";
+    const { rows } = await pool.query(query, [id]);
+    return rows[0]; // Retorna el primer post encontrado
+  } catch (error) {
+    console.error("Error al obtener el post por ID:", error);
+    throw error;
+  }
 };
+
+  
+  // ✅ Nueva función para actualizar los likes de un post
+  const updateLikes = async (id, likes) => {
+    try {
+      const query = "UPDATE posts SET likes = $1 WHERE id = $2 RETURNING *";
+      const { rows } = await pool.query(query, [likes, id]);
+  
+      if (rows.length === 0) {
+        throw new Error("No se encontró un post con el ID proporcionado");
+      }
+  
+      return rows[0];
+    } catch (error) {
+      console.error("Error al actualizar los likes:", error);
+      throw error;
+    }
+  };
+  
+  
+  // ✅ Nueva función para eliminar un post
+  const deletePost = async (id) => {
+    try {
+      const query = "DELETE FROM posts WHERE id = $1 RETURNING *";
+      const { rows } = await pool.query(query, [id]);
+  
+      if (rows.length === 0) {
+        throw new Error(`No se encontró un post con el ID ${id}`);
+      }
+  
+      return rows[0]; 
+    } catch (error) {
+      console.error("Error al eliminar el post:", error);
+      throw error;
+    }
+  };
+  
+  // Exporta todas las funciones
+  export const postModel = {
+    findAll,
+    create,
+    findById,
+    updateLikes,
+    deletePost
+  };
